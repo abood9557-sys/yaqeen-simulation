@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>يقين | العرض التفاعلي لسيف 2026</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap">
+<style>
+/* Layout: one evidence page, eight tabs. Order: real redacted data, labelled simulation, limits, poster map first; then evidence details, architecture, late alert, jury. */
+:root{
+  --bg:#EEF3F1; --panel:#FFFFFF; --ink:#10302D; --muted:#53686A; --line:#CFDBD8;
+  --teal:#0A6B63; --teal-soft:#D8EEEA; --amber:#8A5A00; --amber-soft:#F7E8C8;
+  --red:#B3261E; --red-soft:#F9DCD9; --blue:#1F4E9E; --blue-soft:#E3ECF9;
+  --font:'IBM Plex Sans Arabic',Tahoma,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0D1B1A; --panel:#142826; --ink:#E3F0EE; --muted:#9DB4B1; --line:#2A4643;
+  --teal:#52D3C2; --teal-soft:#15403B; --amber:#E8B44C; --amber-soft:#3A2D10;
+  --red:#FF8F86; --red-soft:#4A1F1C; --blue:#8DB4FF; --blue-soft:#1B2B4A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0D1B1A; --panel:#142826; --ink:#E3F0EE; --muted:#9DB4B1; --line:#2A4643;
+  --teal:#52D3C2; --teal-soft:#15403B; --amber:#E8B44C; --amber-soft:#3A2D10;
+  --red:#FF8F86; --red-soft:#4A1F1C; --blue:#8DB4FF; --blue-soft:#1B2B4A; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.7;padding:20px 16px 48px}
+.wrap{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1{font-size:28px;line-height:1.3;margin:0;text-wrap:balance}
+h2{font-size:20px;margin:0 0 8px;text-wrap:balance}
+h3{font-size:17px;margin:0 0 6px}
+p{margin:0}
+.sub{color:var(--muted);font-size:15px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center}
+.tag{display:inline-block;border-radius:999px;padding:2px 12px;font-size:13px;font-weight:600;border:1.5px solid var(--line);background:var(--panel)}
+.tag.real{border-color:var(--teal);background:var(--teal-soft)}
+.tag.simu{border-color:var(--blue);background:var(--blue-soft)}
+.tag.test{border-color:var(--amber);background:var(--amber-soft)}
+.banner{background:var(--amber-soft);border:1px solid var(--amber);border-radius:12px;padding:10px 14px;font-size:15px}
+nav{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 14px;min-height:44px}
+button:hover{border-color:var(--teal)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+button[aria-selected="true"],button.on{background:var(--teal-soft);border-color:var(--teal);font-weight:700}
+button.pri{background:var(--teal);border-color:var(--teal);color:#fff}
+:root[data-theme="dark"] button.pri{color:#06201C}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) button.pri{color:#06201C}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.tile{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.tile b{display:block;font-size:28px;line-height:1.2;font-variant-numeric:tabular-nums}
+.tile span{color:var(--muted);font-size:14px}
+.t{direction:ltr;unicode-bidi:isolate;font-variant-numeric:tabular-nums;display:inline-block}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+svg{display:block;width:100%;height:auto;min-width:640px}
+svg text{font-family:var(--font);fill:var(--ink)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--bg);color:var(--muted);font-size:13px;font-weight:600}
+tr.held td:last-child{color:var(--red);font-weight:700}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.ctl{display:flex;flex-direction:column;gap:8px}
+input[type=range]{width:100%;accent-color:var(--teal)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.col{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--bg)}
+.col.ok{border-color:var(--teal);border-width:2px}.col.no{border-color:var(--red);border-width:2px}.col.pend{border-color:var(--amber);border-width:2px}
+.col ul{margin:6px 0 0;padding-inline-start:20px;display:flex;flex-direction:column;gap:6px}
+.chain{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.chain li{border:1px solid var(--teal);border-radius:10px;padding:8px 10px;background:var(--teal-soft);font-size:14px;line-height:1.5}
+.chain li b{display:block;font-size:15px}
+.phone{border:2px solid var(--line);border-radius:18px;padding:12px 14px;background:var(--bg);min-height:150px;display:flex;flex-direction:column;gap:8px}
+.badge{display:inline-block;border-radius:999px;padding:2px 12px;font-size:13px;font-weight:700;border:1.5px solid var(--line)}
+.b-ok{background:var(--teal-soft);border-color:var(--teal)}.b-off{background:var(--amber-soft);border-color:var(--amber)}.b-crit{background:var(--red-soft);border-color:var(--red)}
+.mini{font-size:14px;border-bottom:1px dashed var(--line);padding:4px 0}
+.empty{color:var(--muted);font-size:14px}
+.qa{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.qa b{display:block;margin-bottom:4px}
+section[hidden]{display:none}
+.ev{border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.ev dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:0;font-size:15px}.ev dt{color:var(--muted)}.ev dd{margin:0}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.steps button{min-height:64px;text-align:right}
+.ga{display:flex;gap:8px;flex-wrap:wrap}
+.big body,body.big{font-size:20px}body.big h1{font-size:36px}body.big .wrap{max-width:1300px}
+.fab{position:fixed;inset-inline-start:14px;bottom:14px;z-index:5;background:var(--amber-soft);border-color:var(--amber);font-weight:700}
+.slogan{font-size:19px;font-weight:600;color:var(--teal)}
+@media print{.fab,nav{display:none}}
+@media (max-width:600px){h1{font-size:23px}body{padding-inline:12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header style="display:flex;flex-direction:column;gap:10px">
+  <h1>يقين: ما شاهدناه فعلاً، وكيف يعمل</h1>
+  <p class="slogan">الحدث يُسجَّل بوقته الأصلي على الجهاز، ويُرفع حين يعود الاتصال.</p>
+  <p class="sub">فريق SAIF140098 · صفحة مرافقة للملصق · النموذج الأولي Build 33 · تجارب 12–13 نوفمبر 2026</p>
+  <div class="legend" aria-label="دلالة الوسوم"><span class="tag real">بيانات حقيقية منقّحة</span><span class="tag simu">محاكاة توضيحية</span><span class="tag test">قيد الاختبار</span></div>
+  <div class="banner"><b>الحدود أولاً:</b> التجارب ذاتية، نفّذها المخترع على جهاز واحد، وليست شهادة مستقلة ولا قياس أداء. أسماء المناطق والإحداثيات والمعرّفات محجوبة، والمناطق مُرمَّزة (أ، ب، ج).</div>
+</header>
+
+<nav role="tablist" aria-label="أقسام الصفحة">
+  <button role="tab" id="tb-real" aria-selected="true" data-t="real">١. ما شوهد فعلاً</button>
+  <button role="tab" id="tb-sim" aria-selected="false" data-t="sim">٢. جرّب المحاكاة</button>
+  <button role="tab" id="tb-limits" aria-selected="false" data-t="limits">٣. حدود الإثبات</button>
+  <button role="tab" id="tb-poster" aria-selected="false" data-t="poster">٤. ربط الملصق بالدليل</button>
+  <button role="tab" id="tb-proof" aria-selected="false" data-t="proof">٥. تفاصيل الدليل ومصدره</button>
+  <button role="tab" id="tb-arch" aria-selected="false" data-t="arch">٦. المعمارية</button>
+  <button role="tab" id="tb-late" aria-selected="false" data-t="late">٧. الإنذار المتأخر</button>
+  <button role="tab" id="tb-jury" aria-selected="false" data-t="jury">٨. عرض التحكيم</button>
+  <button role="tab" id="tb-route" aria-selected="false" data-t="route">٩. من السجل إلى الفهم</button>
+  <button role="tab" id="tb-walk" aria-selected="false" data-t="walk">١٠. محاكاة مسار الطالب</button>
+</nav>
+
+<!-- ============ REAL ============ -->
+<section id="real" class="panel" aria-labelledby="tb-real">
+  <div><span class="tag real">بيانات حقيقية منقّحة</span></div>
+  <h2>إعادة عرض مساء 13 نوفمبر: منطقتان وولي أمر بلا شبكة</h2>
+  <div class="banner"><b>لماذا قطعنا الشبكة؟</b> لنتحقق من أن أحداث السلامة لا تضيع بسبب انقطاع الاتصال. المدة بين وقت الحدث ووقت وصوله إلى الخادم هي مدة احتفاظ الجهاز به أثناء الانقطاع، وليست «تأخر قرار».</div>
+  <p>الطفل كان بلا شبكة (بحسب شريط جهازه)، وولي الأمر في وضع الطيران حتى نحو 11:10 م. حرّك الشريط لترى كل حدث بوقت جهازه ووقت وصوله إلى الخادم، كما ظهرا في سجل الأحداث.</p>
+  <div class="tiles" id="tiles"></div>
+  <div class="ctl">
+    <div class="row">
+      <button class="pri" id="play" type="button">تشغيل</button>
+      <button id="rewind" type="button">من البداية</button>
+      <span>الوقت الآن: <b class="t" id="clk">23:00:30</b></span>
+    </div>
+    <input type="range" id="sl" min="0" max="810" value="0" aria-label="الوقت على خط الزمن">
+  </div>
+  <div class="scroll"><svg id="tl" viewBox="0 0 960 250" role="img" aria-label="خط زمني يربط وقت تسجيل كل حدث على الجهاز بوقت وصوله إلى الخادم"></svg></div>
+  <div class="row sub"><span><b style="color:var(--red)">●</b> حدث احتُجز بسبب الانقطاع</span><span><b style="color:var(--teal)">●</b> حدث وصل فوراً</span><span>المساحة الكهرمانية: انقطاع مستنتج من تأخر الوصول، وبدايته الدقيقة غير موثقة</span></div>
+  <div class="tiles" id="live"></div>
+  <div class="scroll"><table><thead><tr><th>وقت الجهاز</th><th>المنطقة</th><th>الحدث</th><th>وصول الخادم</th><th>مدة الاحتفاظ قبل المزامنة</th></tr></thead><tbody id="rows"></tbody></table></div>
+  <h3>سلسلة الاستجابة في تنبيه 11:11 م (جوال ولي الأمر)</h3>
+  <ol class="chain">
+    <li><b>إنشاء</b><span class="t">23:11:25</span></li>
+    <li><b>إرسال الإشعار</b><span class="t">23:11:25</span></li>
+    <li><b>تأكيد ولي الأمر للاستلام (Acknowledged)</b><span class="t">23:11:39</span> (+14 ث)</li>
+    <li><b>بدء الاستجابة</b><span class="t">23:11:44</span> (+19 ث)</li>
+    <li><b>معالجة</b><span class="t">23:11:58</span> (+33 ث)</li>
+  </ol>
+  <p class="sub">المصدر: لقطات سجل الأحداث وتسجيلا شاشة (جهاز الطفل وجهاز ولي الأمر)، 13 نوفمبر 2026. «مدة الاحتفاظ» محسوبة من وقت الجهاز ووقت الخادم المعروضين في السجل، وتشمل انقطاع الشبكة المتعمد في الاختبار، فهي ليست زمن اتخاذ القرار ولا زمن وصول الإشعار. نص إشعار الحدث 23:09:44 عرض وقته بتوقيت UTC (20:09:44)، وهي ملاحظة واجهة.</p>
+</section>
+
+<!-- ============ SIM ============ -->
+<section id="sim" class="panel" aria-labelledby="tb-sim" hidden>
+  <div class="legend"><span class="tag simu">محاكاة توضيحية</span><span class="tag test">سلوك التقاطع قيد الاختبار</span></div>
+  <h2>جرّب بنفسك: قطع الشبكة ودخول منطقتين</h2>
+  <p>الأحداث والأزمنة هنا مولَّدة في الصفحة وليست قياساً. المحاكاة تعرض ما شاهدناه: يُسجَّل لكل منطقة حدث بوقته الأصلي على الجهاز، ويُحفظ حتى عودة الشبكة. أما عدد الإشعارات عند دخول منطقتين متداخلتين فلم نقسه بعد.</p>
+  <div class="row">
+    <button id="nC" type="button" aria-pressed="true">شبكة الطفل: تعمل</button>
+    <button id="nG" type="button" aria-pressed="true">شبكة ولي الأمر: تعمل</button>
+    <button id="zA" type="button">دخول/خروج المنطقة أ</button>
+    <button id="zB" type="button">دخول/خروج المنطقة ب</button>
+    <button id="w60" type="button">انتظر 60 ثانية</button>
+    <button id="rs" type="button">أعد</button>
+  </div>
+  <div class="cols">
+    <div>
+      <div class="scroll"><svg viewBox="0 0 360 220" role="img" aria-label="منطقتان متجاورتان ونقطة الطفل" style="min-width:300px">
+        <rect width="360" height="220" fill="var(--bg)"/>
+        <circle id="ca" cx="140" cy="110" r="70" fill="var(--red-soft)" fill-opacity=".6" stroke="var(--red)" stroke-width="2.5" stroke-dasharray="6 5"/>
+        <circle id="cb" cx="220" cy="110" r="70" fill="var(--amber-soft)" fill-opacity=".6" stroke="var(--amber)" stroke-width="2.5" stroke-dasharray="6 5"/>
+        <text x="90" y="34" font-size="16" font-weight="700" text-anchor="middle">أ</text>
+        <text x="270" y="34" font-size="16" font-weight="700" text-anchor="middle">ب</text>
+        <circle id="kid" cx="40" cy="190" r="11" fill="var(--teal)" stroke="var(--ink)" stroke-width="2.5"/>
+        <text x="180" y="212" font-size="12" text-anchor="middle" style="fill:var(--muted)">رسم تخطيطي لمنطقتين متجاورتين، دون مقياس</text>
+      </svg></div>
+      <p class="sub" id="state" style="margin-top:8px"></p>
+    </div>
+    <div class="phone"><b>جوال الطفل</b><div class="row"><span class="badge b-ok" id="sSt">طبيعي</span><span class="badge b-ok" id="sNet">متصل</span></div><div class="sub">معلّق للرفع: <b id="sPend">0</b></div><div id="sOut"></div></div>
+  </div>
+  <div class="cols">
+    <div class="phone"><b>سجل الخادم</b><div id="sSrv" class="empty">لا أحداث بعد.</div></div>
+    <div class="phone"><b>جوال ولي الأمر</b><div class="empty" style="font-size:12px">محاكاة لمسار الاستجابة، وليست إثباتاً لوصول إشعار لكل منطقة.</div><div id="sGA" class="empty">لا تنبيه.</div><div class="ga" id="gBtns"></div><div id="sG" class="empty">لا أحداث بعد.</div></div>
+  </div>
+  <p class="sub">الساعة الافتراضية: <b class="t" id="sClk">10:00:00</b> · كل دخول أو خروج يتقدم 6 ثوانٍ. جرّب: اقطع شبكة الطفل وشبكة ولي الأمر، ادخل أ ثم ب، اخرج منهما، شغّل شبكة الطفل، انتظر دقيقة، ثم شغّل شبكة ولي الأمر.</p>
+</section>
+
+<!-- ============ LIMITS ============ -->
+<section id="limits" class="panel" aria-labelledby="tb-limits" hidden>
+  <h2>حدود الإثبات: ما ثبت، وما لا نقوله، وما ننتظر</h2>
+  <div class="cols">
+    <div class="col ok"><h3>ما تدعمه التسجيلات</h3><ul>
+      <li>حفظ أحداث الدخول والإلغاء لمنطقتين على الجهاز بوقتها الأصلي أثناء انقطاع الشبكة، ثم رفعها دفعة واحدة، والمعلّق ارتفع من 2 إلى 6 ثم 0.</li>
+      <li>الأحداث المسجّلة بعد عودة الاتصال ظهرت في السجل دون احتجاز، بينما بقيت الأحداث المحتجزة على الجهاز من 73 إلى 150 ثانية أثناء الانقطاع المتعمد (وهذا ليس زمن قرار ولا قياس سرعة، لأن ساعتي الجهاز والخادم غير متزامنتين).</li>
+      <li>وصول إشعار لولي أمر كان بلا شبكة خلال ثوانٍ من عودتها.</li>
+      <li>مصدر GPS الحقيقي ظاهر على الجهاز، وتقدير الدقة الذي يعرضه الجهاز نحو ±1.2 إلى ±1.4 م.</li>
+      <li>سلسلة إنشاء، إرسال، تأكيد ولي الأمر للاستلام (Acknowledged)، استجابة، معالجة بأوقاتها في سجل التدقيق. التأكيد هنا ضغطة ولي الأمر في التطبيق، وليس قياساً لوصول إشعار الدفع إلى الجهاز.</li>
+    </ul></div>
+    <div class="col no"><h3>ما لا نقوله</h3><ul>
+      <li>أن الموثوقية ثبتت، أو أن النظام «يعمل دون إنترنت» بإطلاق: تجارب ذاتية على جهاز واحد.</li>
+      <li>أن إشعاراً مستقلاً يصل لكل منطقة، أو أن المنطقتين تداخلتا هندسياً لحظة الحدث.</li>
+      <li>أن دقة GPS مقيسة: ±1.2 م تقدير يعرضه الجهاز نفسه، لا مقارنة بنقطة مرجعية.</li>
+      <li>أن الإصلاح الذي أعلنه المطوّر نجح: التجربة على Build 33، وما شوهد من غياب تنبيه قديم مشاهدة واحدة.</li>
+      <li>أن القرار وُلد دون إنترنت في كل تجربة: بدايات الانقطاع غير موثقة بدقة.</li>
+    </ul></div>
+    <div class="col pend"><h3>قيد الاختبار قبل 24 نوفمبر</h3><ul>
+      <li>مقطع متزامن من الجهازين مع الخريطة وحدود المنطقتين ونقطة الموقع.</li>
+      <li>عدد الإشعارات عند دخول منطقتين متداخلتين، بلا تكرار أو إلغاء خاطئ.</li>
+      <li>إعادة الاختبار على النسخة النهائية بمراقب مستقل.</li>
+      <li>التحقق الزمني قبل الإنذار: تصميم لم يكتمل اختباره.</li>
+      <li>تشغيل المستجيب المدرسي والساعة الذكية.</li>
+    </ul></div>
+  </div>
+  <h3>أسئلة متوقعة من المحكّمين</h3>
+  <div class="qa"><b>كيف عرفتم أن القرار اتُّخذ أثناء الانقطاع وليس قبله؟</b>سجل الجهاز يعرض وقت كل حدث، ووصوله إلى الخادم متأخراً بعد عودة الشبكة. لكن بداية الانقطاع في كل تجربة لم تُوثَّق بدقة، فنكرر الاختبار بتسجيل لحظة تفعيل الانقطاع.</div>
+  <div class="qa"><b>هل جربتم على أجهزة متعددة أو بمراقب مستقل؟</b>لا. كل التجارب ذاتية على جهاز واحد، وهذا مكتوب في الملصق.</div>
+  <div class="qa"><b>ماذا كشفت التجارب من أخطاء؟</b>ظهور تنبيه قديم بعد وصول الأحداث المحتجزة (ظهر 13 نوفمبر). الإصلاح بانتظار إعادة اختبارنا على النسخة النهائية.</div>
+  <div class="qa"><b>وماذا عن براءة الاختراع؟</b>الطلب SA 1020267368 مودع، وأُشعرنا بقبوله في الفحص الشكلي بتاريخ 3 نوفمبر 2026، وحالته «تحت الإجراء». لم تُمنح براءة.</div>
+</section>
+
+<!-- ============ POSTER MAP ============ -->
+<section id="poster" class="panel" aria-labelledby="tb-poster" hidden>
+  <h2>ما يقوله الملصق وأين دليله</h2>
+  <div class="scroll"><table style="min-width:640px"><thead><tr><th>قسم الملصق</th><th>الادعاء</th><th>الدليل</th><th>الحالة</th></tr></thead><tbody>
+    <tr><td>النتائج، البند 4</td><td>سلسلة التنبيه: إنشاء 19:12:25، إرسال +1 ث، تأكيد ولي الأمر للاستلام 19:12:51 (ليس قياس وصول الإشعار)، استجابة 19:12:56، معالجة 19:13:04</td><td>تسجيل شاشة جهاز ولي الأمر، 13 نوفمبر</td><td><span class="tag real">بيانات حقيقية، ذاتية</span></td></tr>
+    <tr><td>النتائج، البند 6</td><td>خلل كشفه الاختبار: حدث مرجعي سُجّل 12:36:39 ووصل الخادم 12:44:18 بعد انقطاع متعمد (16 حدثاً محتجزاً)، وظهر تنبيه قديم</td><td>سجلات اختبار ظهر 13 نوفمبر</td><td><span class="tag test">إعادة الاختبار على النسخة النهائية</span></td></tr>
+    <tr><td>النتائج، البند 8</td><td>ستة أحداث لمنطقتين محفوظة بأوقاتها، دفعة 23:09:25، ثم وصول فوري</td><td>هذه الصفحة (القسم 1) وملف النتائج الميدانية</td><td><span class="tag real">بيانات حقيقية، ذاتية</span></td></tr>
+    <tr><td>الابتكار</td><td>القرار على الجهاز، حفظ محلي ثم رفع، سجل تدقيق للتنبيه</td><td>تسجيلات الشاشة</td><td><span class="tag real">مشاهد، ذاتي</span></td></tr>
+    <tr><td>الابتكار</td><td>التحقق الزمني قبل الإنذار</td><td>تصميم في المعمارية</td><td><span class="tag test">لم يكتمل اختباره</span></td></tr>
+    <tr><td>المعمارية</td><td>مخطط التدفق والمراحل</td><td>فيديو شرح المعمارية (تصميمي) ومخطط المعمارية</td><td><span class="tag simu">توضيحي، ليس نتيجة اختبار</span></td></tr>
+    <tr><td>الخاتمة</td><td>طلب براءة مودع، قُبل في الفحص الشكلي (3 نوفمبر 2026)</td><td>إشعار الهيئة السعودية للملكية الفكرية</td><td><span class="tag real">موثّق، لم تُمنح</span></td></tr>
+  </tbody></table></div>
+  <h3>ما يُرفع خلف الرمز</h3>
+  <ul style="margin:0;padding-inline-start:22px;display:flex;flex-direction:column;gap:4px">
+    <li>ملخص النتائج الميدانية المنقّح (المناطق مُرمَّزة، دون إحداثيات أو معرّفات).</li>
+    <li>فيديو شرح المعمارية، ويُسمّى «تصميمي» لا «اختبار».</li>
+    <li>مخطط المعمارية، وبروتوكول الاختبار والسجلات.</li>
+    <li>تسجيلات الشاشة الأصلية تُعرض للجنة عند الطلب بعد حجب ما يلزم.</li>
+  </ul>
+</section>
+
+
+
+<!-- ============ PROOF ============ -->
+<section id="proof" class="panel" aria-labelledby="tb-proof" hidden>
+  <h2>تفاصيل الدليل ومصدره</h2>
+  <div class="panel" style="background:var(--bg)">
+    <h3>بطاقة التحقق الميداني: 13 نوفمبر 2026</h3>
+    <div class="tiles"><div class="tile"><b>6 / 6</b><span>أحداث الدفعة الرئيسية حُفظت ثم تمت مزامنتها</span></div><div class="tile"><b>0</b><span>معلّق بعد المزامنة</span></div><div class="tile"><b>Build 33</b><span>الإصدار المختبر (ظاهر على الشاشة)</span></div></div>
+    <p><b>الهدف:</b> التحقق من حفظ الأحداث أثناء انقطاع الإنترنت عمداً ومزامنتها بعد عودته.</p>
+    <p><b>النتيجة:</b> وصلت الأحداث الستة بأوقاتها الأصلية في التشغيل المختبر، وارتفع عدّاد المعلّق من 2 إلى 6 ثم صفر.</p>
+    <p><b>حدود الإثبات:</b> تجربة ذاتية على جهاز واحد. لا تقيس زمن وصول الإشعار لولي الأمر ولا الاعتمادية في كل الظروف، ولا تثبت إصلاح التنبيه القديم.</p>
+  </div>
+  <h3>اختبر ادعاءات يقين</h3>
+  <p class="sub">أسئلة يطرحها المحكّم عادةً، وجوابنا بحالته الصريحة.</p>
+  <div id="cq" style="display:flex;flex-direction:column;gap:8px"></div>
+  <h3 style="margin-top:8px">الدليل خلف كل نتيجة</h3>
+  <p>اضغط على أي نتيجة لترى مصدرها وإصدارها وما تثبته وما لا تثبته. الأصول (تسجيلات الشاشة) في مجلد الأدلة الأصلية.</p>
+  <div id="evl" style="display:flex;flex-direction:column;gap:10px"></div>
+</section>
+
+<!-- ============ ARCH ============ -->
+<section id="arch" class="panel" aria-labelledby="tb-arch" hidden>
+  <h2>كيف يعمل يقين: اضغط على كل مرحلة</h2>
+  <p class="sub">مخطط تصميمي مبسّط. لكل مرحلة ما ثبت منها بالتسجيلات وما لم يثبت بعد.</p>
+  <div class="steps" id="asteps"></div>
+  <div class="col" id="adet" aria-live="polite"></div>
+  <div class="banner"><b>التحقق الزمني قبل الإنذار:</b> جزء من التصميم المقترح، ولم يكتمل اختباره، فلا نعدّه مثبتاً.</div>
+</section>
+
+
+<!-- ============ LATE ALERT ============ -->
+<section id="late" class="panel" aria-labelledby="tb-late" hidden>
+  <div class="legend"><span class="tag real">أوقات حقيقية منقّحة</span><span class="tag test">السلوك الصحيح تصميم، لم يثبت تطبيقه</span></div>
+  <h2>اختبار الإنذار المتأخر: دخل الطفل وخرج أثناء الانقطاع</h2>
+  <p>هذا ما سُجّل مساء 13 نوفمبر لمنطقة (أ). اضغط لتتقدّم في المشهد ثم قرّر ما ينبغي فعله.</p>
+  <div class="chain" id="lt"></div>
+  <div class="row"><button class="pri" id="ltn" type="button">الخطوة التالية</button><button id="ltr" type="button">من البداية</button></div>
+  <div id="ltq" hidden>
+    <h3>عادت الشبكة ووصل الحدثان معاً. ماذا ينبغي أن يفعل النظام؟</h3>
+    <div class="row"><button id="qa" type="button">إرسال إنذار عاجل عن الدخول القديم</button><button id="qb" type="button">حفظ الحدث في السجل دون إنذار عن خطر انتهى</button></div>
+    <div class="qa" id="qr" hidden></div>
+  </div>
+  <h3>ماذا حدث فعلاً في تجربتين مختلفتين؟</h3>
+  <div class="cols">
+    <div class="col no"><h3>ظهر 13 نوفمبر</h3><p>تنبيه أُلغي <span class="t">12:36:57</span> دُفع مع ذلك <span class="t">12:44:19</span> بعد انقطاع متعمد. هذا هو الخلل الذي كشفه الاختبار.</p></div>
+    <div class="col pend"><h3>مساء 13 نوفمبر</h3><p>دخول <span class="t">23:07:47</span> وخروج <span class="t">23:08:05</span> وصلا معاً <span class="t">23:09:25</span>. لم يظهر في تسجيل ولي الأمر تنبيه قديم عنهما، علماً أن جواله كان في وضع الطيران حتى نحو 23:10.</p></div>
+  </div>
+  <div class="banner"><b>القراءة المحافظة:</b> ظروف مختلفة ونتيجتان مختلفتان على Build 33، وكل منهما مشاهدة واحدة. لا ننسب أياً منهما إلى إصلاح بعينه، وإعادة الاختبار على النسخة النهائية مطلوبة قبل أي ادعاء.</div>
+</section>
+
+<!-- ============ JURY ============ -->
+<section id="jury" class="panel" aria-labelledby="tb-jury" hidden>
+  <h2>عرض مقترح للمحكّم خلال دقيقتين</h2>
+  <div class="cols">
+    <div class="col"><span class="tag" dir="ltr">00:00 – 00:30</span><h3>المشكلة</h3><p>ماذا يحدث لقرار سلامة الطالب إذا انقطع الإنترنت قرب منطقة خطر؟</p></div>
+    <div class="col"><span class="tag" dir="ltr">00:30 – 01:15</span><h3>ما شوهد</h3><p>افتح القسم ١ واضغط تشغيل: منطقتان، ستة أحداث محفوظة بأوقاتها، دفعة واحدة 23:09:25، ثم وصول فوري. وقل بصراحة: تجربة ذاتية على جهاز واحد.</p></div>
+    <div class="col"><span class="tag" dir="ltr">01:15 – 02:00</span><h3>الأصالة والصدق العلمي</h3><p>القرار على الجهاز، والنقل وحده ينتظر الاتصال. ثم افتح «حدود الإثبات» وبيّن ما لا ندّعيه وما سنختبره قبل النهائيات.</p></div>
+  </div>
+  <h3>ماذا يُعرض من الفيديوهات؟</h3>
+  <div class="cols">
+    <div class="col ok"><h3>تُعرض (بعد حجب الأسماء والمواقع والمعرّفات)</h3><ul>
+      <li>تسجيل جهاز الطفل وتسجيل جهاز ولي الأمر لاختبار مساء 13 نوفمبر: هما الأقوى لأنهما يظهران المنطقتين وعدّاد المعلّق والدفعة والإشعار.</li>
+      <li>تسجيل التدقيق الإلكتروني 13 نوفمبر (سلسلة الإنشاء إلى المعالجة).</li>
+      <li>فيديو شرح المعمارية بوصفه «تصميمياً» فقط.</li>
+    </ul></div>
+    <div class="col no"><h3>لا نعتمد عليه وحده</h3><ul>
+      <li>تسجيل ظهر 13 نوفمبر وحده: حالة الخطر ظهرت «مُثبَّتة»، فلا يثبت أن القرار وُلد أثناء الانقطاع.</li>
+      <li>فيديو الشرح بوصفه نتيجة اختبار: هو رسم تصميمي.</li>
+      <li>هذه الصفحة بوصفها تصويراً حقيقياً: هي إعادة عرض لبيانات منقّحة ومحاكاة.</li>
+    </ul></div>
+  </div>
+  <div class="banner"><b>قبل التحكيم:</b> ثبّت رقم الإصدار (Build) على كل فيديو ونتيجة، ولا تستخدم اختبار Build 33 دليلاً على نجاح أي إصلاح لاحق، ولا تعرض موقعاً أو بيانات حقيقية لطفل.</div>
+  <h3>إن أردتم عرضاً حياً (اختياري)</h3>
+  <div class="banner">العرض الحي مخاطرة: يعتمد على الشبكة والإشعارات وقت التحكيم. الأصل أن يكون الفيديو هو الأساس، والحي إضافة إن نجحت البروفة.</div>
+  <ul style="margin:0;padding-inline-start:22px;display:flex;flex-direction:column;gap:4px"><li>جهاز الطفل وولي الأمر بحسابات تجريبية، والموقع والبطارية والصلاحيات مضبوطة.</li><li>تسجيل الشاشتين مع ساعة ظاهرة ومرجع وقت واحد.</li><li>بروفة كاملة بالشبكة ثم بقطعها وإعادتها، وحفظ تسجيل احتياطي.</li><li>لا نعرض الإنذار القديم على أنه ميزة مثبتة قبل إعادة اختباره.</li></ul>
+  <h3>شرح أقسام الملصق</h3>
+  <div class="cols">
+    <div class="qa"><b>المقدمة والفجوة</b>انقطاع الإنترنت قد يؤخر قرار السلامة إذا اعتمدت المعالجة على اتصال خارجي.</div>
+    <div class="qa"><b>المنهجية</b>سياسة مناطق محفوظة على الجهاز، وفصل القرار عن الاتصال، وتسجيل الحدث محلياً ثم رفعه ومقارنة السجلين.</div>
+    <div class="qa"><b>النتائج</b>تجارب 11 و12 و13 نوفمبر من سجلات مختلفة، وليست عدد تجارب مستقلة. تُقرأ كل نتيجة بإصدارها وظروفها.</div>
+    <div class="qa"><b>الأصالة</b>الجمع بين القرار المحلي والسجل الأصلي وسجل التدقيق. لا ندّعي أن كل مكوّن منفرد غير مسبوق.</div>
+    <div class="qa"><b>الحدود</b>اختبارات ذاتية محدودة، والتداخل والتحقق الزمني والساعة الذكية تحتاج إثباتاً إضافياً.</div>
+    <div class="qa"><b>الملكية الفكرية</b>الطلب SA 1020267368 مودع، وقُبل في الفحص الشكلي 3 نوفمبر 2026، وحالته «تحت الإجراء». لم تُمنح براءة.</div>
+  </div>
+</section>
+
+
+<section id="route" class="panel" aria-labelledby="tb-route" hidden>
+  <h2>من السجل إلى الفهم: ماذا يفتحه حفظ الوقت والمنطقة؟</h2>
+  <p class="sub">يحفظ يقين لكل حدث وقته وتاريخه ومنطقته. هذا القسم يفصل بوضوح بين ما شاهدناه في تجاربنا، وما يمكن أن يبنيه السجل لاحقاً.</p>
+
+  <div class="col ok">
+    <span class="tag">بيانات حقيقية منقّحة</span>
+    <h3>ما شاهدناه: مسار عبر ثلاث مناطق (13 نوفمبر 2026)</h3>
+    <p class="sub" style="margin:0 0 6px">من سجل الأحداث المنقّح (النسخة 33). المناطق مُرمَّزة (أ، ب، ج). «إلغاء» تعني إغلاق حدث المنطقة، أي الخروج منها. الأوقات أوقات الجهاز.</p>
+    <div class="scroll"><table><thead><tr><th>وقت الجهاز</th><th>المنطقة</th><th>الحدث</th></tr></thead><tbody id="rtBody"></tbody></table></div>
+    <div class="tiles" id="rtTiles" style="margin-top:10px"></div>
+    <p class="sub" style="margin:8px 0 0">القراءة الصادقة: السجل احتفظ بترتيب المناطق وأوقاتها، فيمكن إعادة بناء المسار بعد الحدث. هذا ما شوهد. أما تحليل الأنماط عبر الأيام فلم نبنه ولم نختبره.</p>
+  </div>
+
+  <div class="col pend">
+    <span class="tag">مثال توضيحي · بيانات مختلقة · ليست من تجاربنا</span>
+    <h3>ما يمكن أن يظهره السجل لاحقاً: أسبوع افتراضي لطالب أ</h3>
+    <p class="sub" style="margin:0 0 8px">عدد مرات دخول المناطق الحمراء في كل حصة (أرقام مختلقة لبيان الفكرة).</p>
+    <div class="scroll"><table id="hm"></table></div>
+    <div class="qa" style="margin-top:10px"><b>كيف تُقرأ؟</b>تتكرر الدخولات في الحصة الثالثة، وكان المعلم ب هو المسؤول عنه وقتها. هذا نمط يستحق مراجعة بشرية: ماذا كان يحدث في هذا الوقت؟ هل هناك ازدحام أو ضوضاء أو انتقال بين نشاطين؟ وهو سؤال للمعلمين، وليس تشخيصاً للطالب ولا حكماً على معلم.</div>
+    <div class="banner" style="margin-top:8px"><b>غير مبني بعد:</b> ربط الأحداث بجدول الحصص وباسم المعلم المسؤول، وتحليل الأيام والساعات. هذا عمل مستقبلي، وسيكون بصلاحيات محدودة وبموافقة المدرسة.</div>
+  </div>
+
+  <div class="col">
+    <span class="tag">توضيحي · نموذج مبسّط</span>
+    <h3>ماذا يُحفظ عند انقطاع الاتصال؟</h3>
+    <div class="row"><button id="cmpOff" type="button" aria-pressed="true">الاتصال مقطوع</button><button id="cmpOn" type="button" aria-pressed="false">الاتصال عاد</button></div>
+    <div class="cols" style="margin-top:8px">
+      <div class="col no"><h3>نظام يعتمد القرار على الخادم</h3><p id="cmpS"></p></div>
+      <div class="col ok"><h3>يقين: القرار على الجهاز</h3><p id="cmpY"></p></div>
+    </div>
+    <div class="banner"><b>لا نقول إن يقين أسرع:</b> لم نقس سرعة. الفرق الذي نعرضه هو ما يُحفظ ومتى يُعرف الحدث وبأي وقت. وإشعار ولي الأمر نفسه ينتظر عودة الاتصال في الحالتين.</div>
+  </div>
+</section>
+
+
+<section id="walk" class="panel" aria-labelledby="tb-walk" hidden>
+  <h2>محاكاة: طالب يخرج من فصله إلى البوابة والإنترنت مقطوع</h2>
+  <div class="banner"><b>محاكاة توضيحية:</b> خريطة مبسّطة بدون مقياس، وأوقاتها افتراضية، وأسماء المناطق عامة. ليست قياساً ولا تسجيلاً حقيقياً. وفي التجارب الحقيقية شاهدنا حفظ أحداث مناطق بأوقاتها ثم رفعها عند عودة الاتصال (القسم ١).</div>
+  <div class="row">
+    <button class="pri" id="wPlay" type="button">ابدأ خروج الطالب</button>
+    <button id="wNet" type="button" aria-pressed="false">أعد الإنترنت</button>
+    <button id="wRs" type="button">من البداية</button>
+    <span class="sub">الإنترنت: <b id="wNs">مقطوع</b> · الوقت الافتراضي: <b class="t" id="wClk">08:00:00</b></span>
+  </div>
+  <div class="scroll"><svg id="wMap" viewBox="0 0 760 330" role="img" aria-label="خريطة مبسّطة لمسار طالب من فصل الصف السادس عبر أربع مناطق حمراء إلى البوابة الرئيسية" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px">
+    <rect x="14" y="14" width="732" height="302" rx="10" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="3 6"/>
+    <text x="30" y="36" font-size="13" fill="var(--muted)">سور المدرسة</text>
+    <rect x="40" y="200" width="110" height="80" rx="8" fill="var(--teal-soft)" stroke="var(--teal)"/><text x="95" y="244" text-anchor="middle" font-size="14" fill="var(--ink)">فصل السادس</text>
+    <g id="wZones"></g>
+    <polyline id="wPath" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="4 5" points=""/>
+    <circle id="wKid" r="11" fill="var(--teal)" stroke="var(--ink)" stroke-width="2.5" cx="95" cy="240"/>
+  </svg></div>
+  <div class="cols">
+    <div class="col ok"><h3>يقين: جوال الطالب</h3>
+      <div class="row"><span class="tag" id="wPend">معلّق للرفع: 0</span></div>
+      <div id="wDev" class="sub" style="max-height:230px;overflow:auto">لا أحداث بعد.</div></div>
+    <div class="col"><h3>ما تراه الإدارة</h3>
+      <div id="wAdm" class="sub" style="max-height:230px;overflow:auto">لا شيء يصل بعد. الإنترنت مقطوع.</div></div>
+    <div class="col no"><h3>نظام يعتمد القرار على الخادم (نموذج مبسّط)</h3>
+      <div id="wSrv" class="sub" style="max-height:230px;overflow:auto">لا أحداث بعد.</div></div>
+  </div>
+  <h3>مناوب يقين: من يتدخل ومن يحتاج متابعة؟ <span class="tag">تصميم توضيحي · لم يُختبر</span></h3>
+  <div class="cols" id="wT"></div>
+  <div class="col"><h3>الملخص النهائي للإدارة</h3><div id="wFin" style="display:flex;flex-direction:column;gap:4px"></div></div>
+  <div class="banner" id="wNote">اضغط «ابدأ»: الطالب يخرج من فصله، يمر بمنطقة حمراء بعد أخرى، حتى البوابة الرئيسية. أبقِ الإنترنت مقطوعاً، ثم اضغط «أعد الإنترنت».</div>
+  <p class="sub">تنبيه: أدوار المعلمين المناوبين وحالة اتصالهم وتسجيل من تدخّل هي تصميم لم نختبره، وتشغيل المستجيب المدرسي ضمن المرحلة القادمة. الأسماء والتاريخ والأوقات افتراضية.</p>
+  <p class="sub">لا نقول إن يقين أسرع، فلم نقس سرعة. الفرق في ما يُحفظ: يقين يحتفظ بالمسار كاملاً بترتيبه وأوقاته ويرسله عند عودة الاتصال، والنموذج المعتمد على الخادم لا يستطيع اتخاذ القرار ولا تسجيل الحدث أثناء الانقطاع.</p>
+</section>
+
+<button class="fab" id="big" type="button">وضع التحكيم ⛶</button>
+<p class="sub">إعادة عرض لسجلات حقيقية منقّحة، ومحاكاة توضيحية لا تمثل قياساً. لا أسماء ولا إحداثيات ولا معرّفات.</p>
+</div>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id)};
+  function sec(s){var p=s.split(':');return (+p[0])*3600+(+p[1])*60+(+p[2])}
+  function hms(n){n=Math.round(n);var h=Math.floor(n/3600)%24,m=Math.floor(n/60)%60,s=n%60;return (h<10?'0':'')+h+':'+(m<10?'0':'')+m+':'+(s<10?'0':'')+s}
+  function dur(d){return d>=60?Math.floor(d/60)+' د '+(d%60)+' ث':(d>=2?d+' ث':'بلا احتجاز')}
+
+  /* ---- tabs with plain-hash routing ---- */
+  var TABS=['real','sim','limits','poster','proof','arch','late','jury','route','walk'];
+  function show(t){if(TABS.indexOf(t)<0)t='real';TABS.forEach(function(x){$(x).hidden=(x!==t);$('tb-'+x).setAttribute('aria-selected',x===t)});}
+  Array.prototype.forEach.call(document.querySelectorAll('nav button'),function(b){b.onclick=function(){var t=b.getAttribute('data-t');show(t);try{history.replaceState(null,'','#'+t)}catch(e){location.hash=t}}});
+  function fromHash(){show((location.hash||'').replace('#',''))}
+  window.addEventListener('hashchange',fromHash);
+
+  /* ---- real data: 13 Nov 2026, Build 33, zones coded ---- */
+  var EV=[["23:01:11","أ","دخول","23:03:08"],["23:01:17","ب","دخول","23:03:08"],["23:06:55","أ","إلغاء","23:09:25"],["23:07:04","ب","إلغاء","23:09:25"],["23:07:47","أ","دخول","23:09:25"],["23:07:53","ب","دخول","23:09:25"],["23:08:05","أ","إلغاء","23:09:25"],["23:08:12","ب","إلغاء (خروج)","23:09:25"],["23:09:44","أ","دخول","23:09:44"],["23:11:04","أ","إلغاء","23:11:04"],["23:11:25","ج","دخول","23:11:25"],["23:12:02","ج","إلغاء (خروج)","23:12:02"],["23:12:15","ب","دخول","23:12:15"],["23:12:17","أ","دخول","23:12:17"],["23:12:57","أ","إلغاء (خروج)","23:12:57"],["23:13:49","ب","إلغاء (خروج)","23:13:50"]]
+    .map(function(e){var d=sec(e[0]),a=sec(e[3]);return {d:d,z:e[1],k:e[2],a:a,dl:a-d,dt:e[0],at:e[3]}});
+  var T0=sec('23:00:30'),T1=sec('23:14:00'),SPAN=T1-T0;
+  var OUT=[[sec('23:01:11'),sec('23:03:08')],[sec('23:06:55'),sec('23:09:25')]];
+  var GUARD=[T0,sec('23:10:00')];
+  var held=EV.filter(function(e){return e.dl>=30}), inst=EV.filter(function(e){return e.dl<30});
+  var minH=Math.min.apply(null,held.map(function(e){return e.dl})),maxH=Math.max.apply(null,held.map(function(e){return e.dl}));
+  $('tiles').innerHTML='<div class="tile"><b>6 / 6</b><span>أحداث الدفعة الرئيسية حُفظت ثم تمت مزامنتها 23:09:25</span></div><div class="tile"><b>0</b><span>معلّق بعد المزامنة</span></div><div class="tile"><b>'+EV.length+'</b><span>حدثاً في السجل المنقّح</span></div><div class="tile"><b>'+held.length+'</b><span>احتُجزت على الجهاز ثم رُفعت</span></div><div class="tile"><b>'+minH+'–'+maxH+' ث</b><span>مدة احتفاظ الجهاز بها قبل المزامنة (تشمل انقطاعاً متعمداً)</span></div><div class="tile"><b>'+inst.length+'</b><span>سُجّلت بلا احتجاز بعد عودة الاتصال</span></div>';
+  var X=function(t){return 30+(t-T0)/SPAN*900};
+  var cur=0,timer=null;
+  function drawTL(t){
+    var s='',i;
+    OUT.forEach(function(o){s+='<rect x="'+X(o[0]).toFixed(1)+'" y="26" width="'+(X(o[1])-X(o[0])).toFixed(1)+'" height="134" fill="var(--amber-soft)" opacity=".9"/>'});
+    s+='<text x="40" y="18" font-size="13" style="fill:var(--muted)">وقت تسجيل الحدث على الجهاز</text><text x="40" y="186" font-size="13" style="fill:var(--muted)">وقت وصوله إلى الخادم</text>';
+    s+='<line x1="30" y1="60" x2="930" y2="60" stroke="var(--line)" stroke-width="2"/><line x1="30" y1="150" x2="930" y2="150" stroke="var(--line)" stroke-width="2"/>';
+    for(i=T0+30;i<=T1;i+=60){var m=Math.round(i/60)*60;if(m<T0)continue;s+='<line x1="'+X(m).toFixed(1)+'" y1="150" x2="'+X(m).toFixed(1)+'" y2="156" stroke="var(--muted)"/><text x="'+X(m).toFixed(1)+'" y="172" font-size="11" text-anchor="middle" style="fill:var(--muted)">'+hms(m).slice(0,5)+'</text>'}
+    EV.forEach(function(e){var c=e.dl>=30?'var(--red)':'var(--teal)',shown=e.d<=t,arr=e.a<=t;
+      s+='<line x1="'+X(e.d).toFixed(1)+'" y1="60" x2="'+X(e.a).toFixed(1)+'" y2="150" stroke="'+c+'" stroke-width="'+(e.dl>=30?1.6:1)+'" opacity="'+(shown?.55:.12)+'"/>';
+      s+='<circle cx="'+X(e.d).toFixed(1)+'" cy="60" r="6" fill="'+c+'" opacity="'+(shown?1:.2)+'"/>';
+      s+='<circle cx="'+X(e.a).toFixed(1)+'" cy="150" r="6" fill="'+c+'" opacity="'+(arr?1:.2)+'"/>'});
+    s+='<text x="'+X(sec('23:07:30')).toFixed(1)+'" y="44" font-size="12" text-anchor="middle" style="fill:var(--amber)">بلا شبكة (مستنتج)</text>';
+    s+='<rect x="'+X(GUARD[0]).toFixed(1)+'" y="206" width="'+(X(GUARD[1])-X(GUARD[0])).toFixed(1)+'" height="22" rx="5" fill="var(--blue-soft)" stroke="var(--blue)"/><text x="'+((X(GUARD[0])+X(GUARD[1]))/2).toFixed(1)+'" y="222" font-size="12" text-anchor="middle">جوال ولي الأمر: وضع الطيران حتى نحو 23:10</text>';
+    s+='<line x1="'+X(t).toFixed(1)+'" y1="26" x2="'+X(t).toFixed(1)+'" y2="236" stroke="var(--ink)" stroke-width="2" stroke-dasharray="5 4"/>';
+    $('tl').innerHTML=s}
+  function upd(){
+    var t=T0+cur;$('clk').textContent=hms(t);$('sl').value=cur;drawTL(t);
+    var pend=EV.filter(function(e){return e.d<=t&&e.a>t}).length,arr=EV.filter(function(e){return e.a<=t}).length,rec=EV.filter(function(e){return e.d<=t}).length;
+    $('live').innerHTML='<div class="tile"><b>'+rec+'</b><span>أحداث سُجّلت حتى الآن</span></div><div class="tile"><b style="color:'+(pend?'var(--red)':'inherit')+'">'+pend+'</b><span>معلّقة على جهاز الطفل (محسوبة من السجل)</span></div><div class="tile"><b>'+arr+'</b><span>وصلت الخادم</span></div>';
+    var h='';EV.forEach(function(e){if(e.d>t)return;var arrived=e.a<=t;h+='<tr class="'+(e.dl>=30?'held':'')+'"><td><span class="t">'+e.dt+'</span></td><td>'+e.z+'</td><td>'+e.k+'</td><td>'+(arrived?'<span class="t">'+e.at+'</span>':'<span class="empty">ينتظر على الجهاز</span>')+'</td><td>'+(arrived?dur(e.dl):'—')+'</td></tr>'});
+    $('rows').innerHTML=h||'<tr><td colspan="5" class="empty">لا أحداث بعد. اضغط تشغيل.</td></tr>'}
+  $('sl').oninput=function(){stopT();cur=+this.value;upd()};
+  function stopT(){if(timer){clearInterval(timer);timer=null}$('play').textContent='تشغيل'}
+  $('play').onclick=function(){if(timer){stopT();return}if(cur>=SPAN)cur=0;$('play').textContent='إيقاف مؤقت';timer=setInterval(function(){cur=Math.min(SPAN,cur+2);upd();if(cur>=SPAN)stopT()},40)};
+  $('rewind').onclick=function(){stopT();cur=0;upd()};
+  cur=sec('23:09:30')-T0;upd(); /* resting state: just after the batch arrives */
+
+  /* ---- simulation ---- */
+  var S;
+  function reset(){S={clk:sec('10:00:00'),nc:true,ng:true,a:false,b:false,evs:[]};sim()}
+  function ev(z){var inz=z==='أ'?S.a:S.b;S.clk+=6;var e={z:z,k:inz?'إلغاء (خروج)':'دخول',d:S.clk,a:S.nc?S.clk:null};S.evs.push(e);if(z==='أ')S.a=!S.a;else S.b=!S.b;sim()}
+  function flush(){S.evs.forEach(function(e){if(e.a===null)e.a=S.clk})}
+  function sim(){
+    $('sClk').textContent=hms(S.clk);
+    $('nC').textContent='شبكة الطفل: '+(S.nc?'تعمل':'مقطوعة');$('nC').setAttribute('aria-pressed',S.nc);$('nC').className=S.nc?'':'on';
+    $('nG').textContent='شبكة ولي الأمر: '+(S.ng?'تعمل':'مقطوعة');$('nG').setAttribute('aria-pressed',S.ng);$('nG').className=S.ng?'':'on';
+    var kx=S.a&&S.b?180:(S.a?120:(S.b?240:40)),ky=S.a||S.b?110:190;$('kid').setAttribute('cx',kx);$('kid').setAttribute('cy',ky);
+    $('state').textContent=S.a&&S.b?'الطفل داخل المنطقتين معاً (سلوك التقاطع قيد الاختبار).':(S.a?'الطفل داخل المنطقة أ.':(S.b?'الطفل داخل المنطقة ب.':'الطفل خارج المنطقتين.'));
+    var crit=S.a||S.b;$('sSt').textContent=crit?'خطر':'طبيعي';$('sSt').className='badge '+(crit?'b-crit':'b-ok');
+    $('sNet').textContent=S.nc?'متصل':'بلا شبكة';$('sNet').className='badge '+(S.nc?'b-ok':'b-off');
+    var pend=S.evs.filter(function(e){return e.a===null});$('sPend').textContent=pend.length;
+    $('sOut').innerHTML=pend.length?pend.map(function(e){return '<div class="mini"><span class="t">'+hms(e.d)+'</span> · '+e.z+' · '+e.k+'</div>'}).join(''):'<div class="empty">لا شيء معلّق.</div>';
+    var arr=S.evs.filter(function(e){return e.a!==null});
+    var rows=arr.map(function(e){return '<div class="mini"><span class="t">'+hms(e.d)+'</span> · '+e.z+' · '+e.k+' · وصل <span class="t">'+hms(e.a)+'</span> ('+dur(e.a-e.d)+')</div>'}).join('');
+    $('sSrv').innerHTML=rows||'<div class="empty">لا أحداث وصلت بعد.</div>';
+    $('sG').innerHTML=S.ng?(rows||'<div class="empty">لا أحداث وصلت بعد.</div>'):'<div class="empty">ولي الأمر بلا شبكة: لا يرى شيئاً حتى تعود شبكته. الأحداث تبقى محفوظة على الخادم بأوقاتها.</div>'}
+
+
+  /* ---- claim questions ---- */
+  var CQ=[
+   ['هل يعمل اتخاذ القرار دون إنترنت؟','شوهد في تجارب محدودة','real','حالات خطر وإلغاء سُجّلت على الجهاز أثناء انقطاع الشبكة في تجارب 12–13 نوفمبر (Build 33).','تجارب ذاتية على جهاز واحد، وبداية الانقطاع غير موثقة بدقة. نكرر الاختبار بتسجيل لحظة تفعيله.'],
+   ['هل وصلت جميع الأحداث بعد عودة الشبكة؟','شوهد في تجربة موثقة','real','الأحداث الستة وصلت 23:09:25 والمعلّق صفر، وكل أحداث السجل المنقّح (16) وصلت.','لا نعرف النتيجة عبر دورات كثيرة، ولم نختبر التكرار أو الترتيب بعد.'],
+   ['هل يصل التنبيه إلى ولي الأمر أثناء الانقطاع؟','قيد الاختبار','test','لا يصل أثناء انقطاع جواله هو. شوهد وصول إشعار 23:09:44 (المنطقة أ) خلال ثوانٍ من عودة شبكته، وظهر شريط إشعار لحدثين لاحقين (23:11:25 المنطقة ج، 23:12:15 المنطقة ب).','لم نقِس زمن وصول الإشعارات، ولم نثبت وصولاً مستقلاً لكل منطقة ولا عدد الإشعارات لكل حادثة.'],
+   ['هل أثبتم منع الإنذارات القديمة؟','قيد الاختبار','test','ظهر تنبيه قديم في اختبار الظهر، ولم يظهر في تسجيل المساء (مشاهدة واحدة).','لا ننسب الفرق إلى إصلاح بعينه. إعادة الاختبار على النسخة النهائية مطلوبة.'],
+   ['ما الفرق بين يقين وتطبيق تحديد موقع عادي؟','شوهد جزء منه','real','قرار على الجهاز، وحفظ الحدث بوقته الأصلي ثم رفعه، وسجل تدقيق للتنبيه. شاهدنا الحفظ المحلي والمزامنة وسلسلة التنبيه.','التحقق الزمني وفعاليته الكمية لم تُختبر بعد.'],
+   ['لماذا استغرق وصول بعض الأحداث 73–150 ثانية؟','ليست قياس سرعة','test','لأن الشبكة قُطعت عمداً. هي مدة احتفاظ الجهاز بالحدث قبل المزامنة، وليست زمن قرار ولا زمن وصول إشعار.','لم نقس زمن القرار المحلي.'],
+   ['هل البراءة ممنوحة؟','طلب لم يُمنح','test','لا. الطلب SA 1020267368 مودع وقُبل في الفحص الشكلي (3 نوفمبر 2026)، وحالته «تحت الإجراء».','قبول الفحص الشكلي لا يعني قبولاً موضوعياً.'],
+   ['هل اختبرتم الساعة الذكية؟','ضمن التطوير','simu','لم تُختبر.','عمل مستقبلي نذكره كاتجاه، لا كنتيجة.'],
+   ['هل أثبتم اختيار أقرب معلم للاستجابة؟','ضمن التطوير','simu','لم يُختبر في تجاربنا.','تصعيد المدرسة تصميم يحتاج تجربة بحسابات المدرسة.']];
+  $('cq').innerHTML=CQ.map(function(c,i){return '<div class="ev"><div class="row"><b>'+c[0]+'</b><span class="tag '+c[2]+'">'+c[1]+'</span><button type="button" data-q="'+i+'" aria-expanded="false">الجواب</button></div><dl hidden id="cqd'+i+'"><dt>ما عندنا</dt><dd>'+c[3]+'</dd><dt>حدّه</dt><dd>'+c[4]+'</dd></dl></div>'}).join('');
+  Array.prototype.forEach.call($('cq').querySelectorAll('button'),function(b){b.onclick=function(){var d=$('cqd'+b.getAttribute('data-q')),o=d.hidden;d.hidden=!o;b.setAttribute('aria-expanded',o);b.textContent=o?'إخفاء':'الجواب'}});
+  /* ---- evidence cards ---- */
+  var EVD=[
+   ['حفظ الأحداث ثم رفعها دفعة واحدة','تسجيل شاشة جهاز الطفل، مساء 13 نوفمبر 2026','Build 33','ستة أحداث لمنطقتين سُجّلت 23:06:55–23:08:12 ووصلت كلها 23:09:25؛ المعلّق ارتفع من 2 إلى 6 ثم 0.','أن بداية الانقطاع موثقة بدقة، أو أن التجربة تتكرر على أجهزة أخرى.','النتائج الميدانية المنقّحة، القسم 1-ج'],
+   ['ظهور الأحداث بلا احتجاز بعد عودة الاتصال','سجل أحداث الطفل (وقت الجهاز مقابل وصول الخادم)','Build 33','أحداث 23:09:44 وما بعدها ظهر وقت الخادم قريباً من وقت الجهاز في عرض السجل، ولا يُؤخذ هذا قياس زمن لأن الساعتين غير متزامنتين.','قياساً دقيقاً دون الثانية: لا ساعة مرجعية مستقلة.','النتائج الميدانية المنقّحة، الجدول'],
+   ['إشعار لولي أمر كان بلا شبكة','تسجيل شاشة جهاز ولي الأمر، 13 نوفمبر','Build 33','إشعار حدث 23:09:44 وصل خلال ثوانٍ من عودة شبكة ولي الأمر (بعد وضع الطيران حتى نحو 23:10).','أن إشعاراً مستقلاً يصل لكل منطقة. نص الإشعار عرض الوقت بتوقيت UTC (ملاحظة واجهة).','تسجيل جهاز ولي الأمر (أصلي)'],
+   ['سلسلة التنبيه 23:11','تسجيل شاشة ولي الأمر + سجل التدقيق','Build 33','إنشاء وإرسال 23:11:25، تأكيد ولي الأمر للاستلام 23:11:39 (ليس قياس وصول الإشعار)، بدء الاستجابة 23:11:44، معالجة 23:11:58.','أن كل المستلمين في مدرسة فعلية سيستلمون، أو أن التصعيد المدرسي نجح.','تسجيل التدقيق (أصلي)'],
+   ['سلسلة التنبيه 19:12 (بشبكة)','تسجيل التدقيق الإلكتروني، 13 نوفمبر','Build 33','إنشاء 19:12:25، إرسال بعد ثانية، تأكيد ولي الأمر للاستلام 19:12:51 (ليس قياس وصول الإشعار)، استجابة 19:12:56، معالجة 19:13:04.','أداء عاماً: حالة واحدة.','تسجيل التدقيق (أصلي)'],
+   ['خلل كشفه الاختبار','سجلات اختبار ظهر 13 نوفمبر','Build 33','حدث مرجعي 12:36:39 وصل الخادم 12:44:18 بعد انقطاع متعمد (16 حدثاً محتجزاً)، وظهر تنبيه قديم بعد وصول الأحداث.','أن الخلل أُصلح: يحتاج إعادة اختبار على النسخة النهائية. وحالة الخطر في ذلك التسجيل «مُثبَّتة» فلا يثبت وحده أن القرار وُلد أثناء الانقطاع.','سجل اختبار الظهر (أصلي)'],
+   ['مصدر الموقع حقيقي','شاشة الإعدادات في تسجيلات 13 نوفمبر','Build 33','وضع «Real Android GPS» محدد، وتقدير الدقة الذي يعرضه الجهاز نحو ±1.2 إلى ±1.4 م.','دقة مقيسة: التقدير من الجهاز نفسه دون مرجع مستقل.','تسجيلات الشاشة (أصلية)']];
+  $('evl').innerHTML=EVD.map(function(e,i){return '<div class="ev"><div class="row"><b>'+e[0]+'</b><span class="tag real">'+e[2]+'</span><button type="button" data-i="'+i+'" aria-expanded="false">عرض تفاصيل الدليل</button></div><dl hidden id="evd'+i+'"><dt>المصدر</dt><dd>'+e[1]+'</dd><dt>ما يثبته</dt><dd>'+e[3]+'</dd><dt>ما لا يثبته</dt><dd>'+e[4]+'</dd><dt>أين تجده</dt><dd>'+e[5]+'</dd></dl></div>'}).join('');
+  Array.prototype.forEach.call($('evl').querySelectorAll('button'),function(b){b.onclick=function(){var d=$('evd'+b.getAttribute('data-i')),o=d.hidden;d.hidden=!o;b.setAttribute('aria-expanded',o);b.textContent=o?'إخفاء':'عرض تفاصيل الدليل'}});
+
+  /* ---- architecture ---- */
+  var AR=[
+   ['١. القرار على الجهاز','الجوال المضيف يقرأ الموقع ويقرر محلياً وفق سياسة المناطق المحفوظة.','قرار محلي مشاهد في تجارب 12–13 نوفمبر، ومصدر GPS الحقيقي ظاهر.','دقة الموقع مقيسة، والتداخل الهندسي بين المناطق.'],
+   ['٢. الحفظ بوقته الأصلي','يُسجَّل الحدث في قاعدة محلية مع وقته، ويظهر «معلّق للرفع».','المعلّق ارتفع من 2 إلى 6 أثناء انقطاع، وبقيت أوقات الأحداث الأصلية.','عدم فقد أي حدث عبر دورات كثيرة، ومنع التكرار.'],
+   ['٣. الرفع عند الاتصال','عند عودة الشبكة يُرفع المعلّق دفعة، ثم يظهر كل جديد دون احتجاز.','دفعة 23:09:25 والمعلّق صفر، ثم ظهور الأحداث الجديدة بلا احتجاز (دون قياس زمن).','أداء النسخة النهائية.'],
+   ['٤. الخادم والتنبيه','الخادم يسجّل الحدث ويُنشئ التنبيه ويرسل الإشعار.','إنشاء وإرسال في تسجيلات التدقيق، ووصول إشعار 23:09:44.','إشعار لكل منطقة، ومنع التنبيه القديم بعد الإلغاء.'],
+   ['٥. ولي الأمر والاستجابة','يستلم ولي الأمر ويبدأ الاستجابة ثم يعالج الحالة، وكلها في سجل التدقيق.','سلسلتان موثقتان (19:12 و23:11).','مسار المدرسة والمعلم المكلف والساعة الذكية.']];
+  $('asteps').innerHTML=AR.map(function(a,i){return '<button type="button" data-a="'+i+'">'+a[0]+'</button>'}).join('');
+  function showA(i){var a=AR[i];Array.prototype.forEach.call($('asteps').children,function(b,k){b.className=k===i?'on':''});$('adet').className='col';$('adet').innerHTML='<h3>'+a[0]+'</h3><p>'+a[1]+'</p><p><b>ثبت:</b> '+a[2]+'</p><p><b>لم يثبت بعد:</b> '+a[3]+'</p>'}
+  Array.prototype.forEach.call($('asteps').children,function(b,i){b.onclick=function(){showA(i)}});showA(0);
+
+
+  /* ---- late alert (real times) ---- */
+  var LT=[['23:07:47','دخول المنطقة أ','سُجّل على جهاز الطفل، والشبكة مقطوعة'],['23:08:05','خروج: إلغاء الخطر','سُجّل على الجهاز أيضاً (بعد 18 ثانية)'],['23:09:25','عادت الشبكة','وصل الحدثان معاً إلى الخادم']],lti=0;
+  function ltr(){$('lt').innerHTML=LT.slice(0,lti+1).map(function(x){return '<div><b>'+x[1]+'</b><span class="t">'+x[0]+'</span><br>'+x[2]+'</div>'}).join('');$('ltn').disabled=lti>=LT.length-1;$('ltq').hidden=lti<LT.length-1;if(lti<LT.length-1)$('qr').hidden=true}
+  $('ltn').onclick=function(){if(lti<LT.length-1){lti++;ltr()}};$('ltr').onclick=function(){lti=0;ltr()};
+  $('qa').onclick=function(){$('qr').hidden=false;$('qr').innerHTML='<b>غير مناسب.</b> إنذار عاجل عن خطر انتهى قبل دقيقتين يضلّل ولي الأمر. هذا بالضبط ما رصدناه في اختبار الظهر.'};
+  $('qb').onclick=function(){$('qr').hidden=false;$('qr').innerHTML='<b>هذا هو السلوك المستهدف:</b> يُحفظ التاريخ كاملاً بأوقاته ولا يُظهَر خطر جارٍ. وهو تصميم نريد إثباته بإعادة الاختبار، وليس شيئاً أثبتنا تطبيقه.'};
+  ltr();
+  /* ---- guardian interactive (scenario) ---- */
+  var GS=0; /* 0 none,1 created,2 ack,3 responding,4 resolved */
+  var GL=['لا تنبيه.','تنبيه خطر جديد: بانتظار التأكيد','تم تأكيد الاستلام','تبدأ الاستجابة','تمت المعالجة'];
+  function gren(){
+    var hasEntry=S.evs.some(function(e){return e.a!==null&&e.k==='دخول'});
+    if(!S.ng||!hasEntry){if(GS<2)GS=0}else if(GS===0)GS=1;
+    $('sGA').className=GS?'':'empty';$('sGA').innerHTML=GS?'<span class="badge b-crit">'+GL[GS]+'</span>':GL[0];
+    var nxt=[null,'تأكيد الاستلام','بدء الاستجابة','إنهاء الحالة'][GS]||'';
+    $('gBtns').innerHTML=nxt?'<button type="button" id="gnx">'+nxt+'</button>':(GS===4?'<span class="sub">سلسلة توضيحية مبنية على مراحل موثقة؛ لا تعني أن كل تنبيه يصل.</span>':'');
+    if($('gnx'))$('gnx').onclick=function(){GS++;gren()}}
+  var _sim=sim;sim=function(){_sim();gren()};
+  var _rs=reset;reset=function(){GS=0;_rs()};
+  $('nC').onclick=function(){S.nc=!S.nc;if(S.nc)flush();sim()};
+  $('nG').onclick=function(){S.ng=!S.ng;sim()};
+  $('zA').onclick=function(){ev('أ')};$('zB').onclick=function(){ev('ب')};
+  $('w60').onclick=function(){S.clk+=60;sim()};$('rs').onclick=reset;
+  
+  /* ---- tab 9: route, illustrative week, offline comparison ---- */
+  (function(){
+    var path=EV.filter(function(e){return e.d>=sec('23:09:44')});
+    $('rtBody').innerHTML=path.map(function(e){return '<tr><td class="t">'+e.dt+'</td><td>'+e.z+'</td><td>'+e.k+'</td></tr>'}).join('');
+    var zs={};EV.forEach(function(e){if(e.k==='دخول'){zs[e.z]=(zs[e.z]||0)+1}});
+    var ks=Object.keys(zs).sort();
+    $('rtTiles').innerHTML=ks.map(function(z){return '<div class="tile"><b>'+zs[z]+'</b><span>مرات دخول المنطقة '+z+' في سجل المساء</span></div>'}).join('')+'<div class="tile"><b>'+EV.length+'</b><span>حدثاً في السجل المنقّح</span></div>';
+    var days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس'];
+    var D=[[0,1,3,0,0,1,0],[1,0,4,1,0,0,0],[0,0,2,0,1,0,1],[0,1,3,1,0,1,0],[0,0,1,0,0,0,0]];
+    var h='<thead><tr><th>اليوم</th>';for(var p=1;p<=7;p++)h+='<th>حصة '+p+'</th>';h+='</tr></thead><tbody>';
+    D.forEach(function(r,i){h+='<tr><td>'+days[i]+'</td>'+r.map(function(v){var bg=v===0?'transparent':(v>=3?'var(--red-soft)':(v===2?'var(--amber-soft)':'var(--teal-soft)'));return '<td style="text-align:center;background:'+bg+';'+(v>=3?'font-weight:700;':'')+'">'+(v||'·')+'</td>'}).join('')+'</tr>'});
+    $('hm').innerHTML=h+'</tbody>';
+    var C={off:{s:'الجوال بلا اتصال، فلا يصل موقعه إلى الخادم ولا يُتخذ قرار. قد لا يوجد أي أثر للحدث، ولا يُعرف وقته الحقيقي.',y:'الجهاز نفسه يطبّق سياسة المناطق المحفوظة، ويحفظ لكل حدث: المنطقة والوقت والتاريخ.'},
+           on:{s:'يصل ما أُرسل بعد عودة الاتصال، وتبقى فترة الانقطاع فجوة في السجل.',y:'تُرفع الأحداث المحفوظة دفعة واحدة، كلٌّ بوقته الأصلي، فيُعاد بناء المسار كاملاً.'}};
+    function cmp(k){$('cmpS').textContent=C[k].s;$('cmpY').textContent=C[k].y;$('cmpOff').setAttribute('aria-pressed',k==='off');$('cmpOn').setAttribute('aria-pressed',k==='on')}
+    $('cmpOff').onclick=function(){cmp('off')};$('cmpOn').onclick=function(){cmp('on')};cmp('off');
+  })();
+  
+  /* ---- tab 10: student walk simulation (illustrative) ---- */
+  (function(){
+    var Z=[{n:'ممر الفصول',x:215,y:180},{n:'فناء المدرسة',x:365,y:120},{n:'منطقة السور',x:535,y:160},{n:'البوابة الرئيسية',x:670,y:240}];
+    var R=52,P=[[95,240],[215,180],[365,120],[535,160],[670,240]];
+    var g='';Z.forEach(function(z,i){g+='<circle id="wz'+i+'" cx="'+z.x+'" cy="'+z.y+'" r="'+R+'" fill="var(--red-soft)" fill-opacity=".7" stroke="var(--red)" stroke-width="2.5" stroke-dasharray="6 5"/><text x="'+z.x+'" y="'+(z.y-R-6)+'" text-anchor="middle" font-size="13" fill="var(--ink)">'+(i+1)+'. '+z.n+'</text>'});
+    $('wZones').innerHTML=g;
+    var L=[],tot=0;for(var i=1;i<P.length;i++){var d=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]);L.push(d);tot+=d}
+    function pos(t){var d=t*tot,i=0;while(i<L.length-1&&d>L[i]){d-=L[i];i++}var f=Math.min(1,d/L[i]);return [P[i][0]+(P[i+1][0]-P[i][0])*f,P[i][1]+(P[i+1][1]-P[i][1])*f]}
+    var VT=sec('08:00:00'),VD=150,DATE='2026-11-17';
+    var EVW=[{t:0,z:-1,k:'بدأ الخروج من الفصل',vt:VT}],ins=Z.map(function(){return false});
+    for(var k=0;k<=1200;k++){var t=k/1200,p=pos(t);Z.forEach(function(z,i){var inz=Math.hypot(p[0]-z.x,p[1]-z.y)<R;if(inz!==ins[i]){ins[i]=inz;EVW.push({t:t,z:i,k:inz?'دخول':'خروج',vt:VT+Math.round(t*VD)})}})}
+    var t=0,run=false,online=false,idx=0,pend=[],devH=[],admH=[],raf=null,last=0;
+    function zn(e){return e.z<0?'فصل السادس':Z[e.z].n}
+    function per(vt){var m=Math.floor((vt-sec('08:00:00'))/60/45);return ['الحصة الأولى','الحصة الثانية','الحصة الثالثة','الحصة الرابعة'][Math.max(0,Math.min(3,m))]}
+    var intv=null;
+    function clk(){$('wClk').textContent=hms(VT+t*VD)}
+    function drawDev(){$('wDev').innerHTML=devH.length?devH.map(function(e){return '<div><span class="t">'+hms(e.vt)+'</span> · '+e.k+' · '+zn(e)+(e.z<0?' ('+per(e.vt)+')':'')+'</div>'}).join(''):'لا أحداث بعد.';$('wPend').textContent='معلّق للرفع: '+pend.length;$('wDev').scrollTop=1e5}
+    function drawAdm(){
+      if(!admH.length){$('wAdm').textContent=online?'لا أحداث بعد.':'لا شيء يصل بعد. الإنترنت مقطوع.';return}
+      var order=[];admH.forEach(function(e){if(e.k==='دخول'&&order.indexOf(Z[e.z].n)<0)order.push(Z[e.z].n)});
+      $('wAdm').innerHTML='<div><b>المسار كما حُفظ:</b> فصل السادس ← '+order.join(' ← ')+'</div>'+admH.map(function(e){return '<div><span class="t">'+DATE+' '+hms(e.vt)+'</span> · '+e.k+' · '+zn(e)+' ('+per(e.vt)+')</div>'}).join('');
+    }
+    function drawSrv(){
+      if(!online&&!srvArrived){$('wSrv').innerHTML='الجوال بلا اتصال: لا يصل موقعه إلى الخادم، فلا يُتخذ قرار ولا يُسجَّل حدث. السجل فارغ.';return}
+      if(!srvArrived){$('wSrv').textContent='لا أحداث بعد.';return}
+      $('wSrv').innerHTML='بعد عودة الاتصال يستلم الخادم موقع الطالب الحالي فقط ('+srvLast+'). <b>لا يستطيع إعادة بناء كيف خرج</b>: لم يُحفظ ما مرّ به أثناء الانقطاع.';
+    }
+    var srvArrived=false,srvLast='';
+    function ev(e){devH.push(e);if(online){admH.push(e)}else{pend.push(e)}}
+    function flush(){while(pend.length){admH.push(pend.shift())}}
+    function step(ts){
+      if(!run)return;
+      if(!last)last=ts;var dt=(ts-last)/1000;last=ts;
+      t=Math.min(1,t+dt/14);
+      var p=pos(t);$('wKid').setAttribute('cx',p[0]);$('wKid').setAttribute('cy',p[1]);
+      while(idx<EVW.length&&EVW[idx].t<=t){ev(EVW[idx]);Z.forEach(function(){});idx++}
+      Z.forEach(function(z,i){var inz=Math.hypot(p[0]-z.x,p[1]-z.y)<R;$('wz'+i).setAttribute('fill-opacity',inz?'1':'.45')});
+      clk();drawDev();drawAdm();
+      if(t>=1){run=false;$('wPlay').textContent='انتهى الخروج';$('wNote').innerHTML=online?'وصل الطالب البوابة، والإدارة ترى المسار لحظة بلحظة.':'وصل الطالب البوابة والإنترنت مقطوع. كل حدث محفوظ على جوال الطالب بوقته: انظر «معلّق للرفع». اضغط «أعد الإنترنت».';return}
+      raf=requestAnimationFrame(step);
+    }
+    function drawTeach(){
+      var A='<div class="row"><b>المعلم المناوب أ</b><span class="tag" style="background:var(--teal-soft);color:var(--teal)">متصل</span></div>',B='<div class="row"><b>المعلم المناوب ب</b><span class="tag" style="background:var(--amber-soft);color:var(--amber)">غير متصل</span></div>';
+      if(!intv){A+='<div class="sub">ينتظر وصول التنبيه.</div>';B+='<div class="sub">آخر ظهور قبل الحدث. لن يصله التنبيه.</div>'}
+      else{A+='<div class="sub"><span class="t">'+DATE+' '+hms(intv.ack)+'</span> · وصله التنبيه وأقرّ به<br><span class="t">'+DATE+' '+hms(intv.go)+'</span> · توجّه إلى البوابة الرئيسية</div>';B+='<div class="sub"><b>لم يصله التنبيه</b> لأنه غير متصل: يحتاج متابعة.</div>'}
+      $('wT').innerHTML='<div class="col">'+A+'</div><div class="col">'+B+'</div>';
+      if(!intv){$('wFin').innerHTML='<div class="sub">يظهر الملخص بعد وصول المسار إلى الإدارة. أعد الإنترنت.</div>';return}
+      var fe=admH.length?admH[admH.length-1]:null;
+      $('wFin').innerHTML='<div><b>التاريخ (افتراضي):</b> '+DATE+'</div><div><b>الطالب:</b> طالب أ</div><div><b>بداية الخروج:</b> <span class="t">08:00:00</span> من فصل السادس ('+per(VT)+')</div><div><b>المسار:</b> فصل السادس ← ممر الفصول ← فناء المدرسة ← منطقة السور ← البوابة الرئيسية</div><div><b>آخر منطقة سُجّلت:</b> '+(fe?zn(fe)+' <span class="t">'+hms(fe.vt)+'</span>':'—')+'</div><div><b>من تدخّل:</b> المعلم المناوب أ <span class="t">'+hms(intv.go)+'</span></div><div><b>للمتابعة:</b> المعلم المناوب ب كان غير متصل ولم يصله التنبيه</div>';
+    }
+    function net(on){
+      online=on;$('wNs').textContent=on?'متصل':'مقطوع';$('wNet').setAttribute('aria-pressed',on);$('wNet').textContent=on?'اقطع الإنترنت':'أعد الإنترنت';
+      if(on){flush();if(devH.length&&!intv){var rt=Math.round(VT+t*VD);intv={ack:rt+14,go:rt+33}}if(devH.length){srvArrived=true;srvLast=idx>=EVW.length?'عند البوابة الرئيسية':zn(devH[devH.length-1])}
+        $('wNote').innerHTML=devH.length?'عاد الإنترنت: أُرسلت أحداث الجوال المحفوظة بترتيبها وبوقت كل حدث الأصلي، فرأت الإدارة كيف خرج الطالب: من الفصل مروراً بكل منطقة حتى البوابة.':'عاد الإنترنت.'}
+      drawAdm();drawSrv();drawDev();drawTeach();
+    }
+    function rs(){run=false;if(raf)cancelAnimationFrame(raf);t=0;idx=0;pend=[];devH=[];admH=[];last=0;srvArrived=false;intv=null;$('wKid').setAttribute('cx',95);$('wKid').setAttribute('cy',240);for(var i=0;i<4;i++)$('wz'+i).setAttribute('fill-opacity','.7');$('wPlay').textContent='ابدأ خروج الطالب';$('wNote').textContent='اضغط «ابدأ»: الطالب يخرج من فصله، يمر بمنطقة حمراء بعد أخرى، حتى البوابة الرئيسية. أبقِ الإنترنت مقطوعاً، ثم اضغط «أعد الإنترنت».';net(false);clk();drawTeach()}
+    $('wPlay').onclick=function(){if(t>=1)return;run=!run;last=0;$('wPlay').textContent=run?'إيقاف مؤقت':'تابع';if(run)raf=requestAnimationFrame(step)};
+    $('wNet').onclick=function(){net(!online)};
+    $('wRs').onclick=rs;
+    rs();
+    window.__wk={ev:EVW};
+  })();
+  $('big').onclick=function(){var b=document.body.classList.toggle('big');$('big').textContent=b?'إنهاء وضع التحكيم':'وضع التحكيم ⛶'};
+  reset();fromHash();
+})();
+</script>
+</body>
+</html>
